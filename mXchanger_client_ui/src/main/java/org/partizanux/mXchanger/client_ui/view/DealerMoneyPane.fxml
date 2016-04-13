@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="298.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.partizanux.mXchanger.client_ui.DealerMoneyController">
+   <children>
+      <TableView fx:id="dealerMoney" layoutX="20.0" layoutY="63.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+         <columns>
+            <TableColumn fx:id="moneyColumn" prefWidth="75.0" text="Money" />
+            <TableColumn fx:id="amountColumn" prefWidth="75.0" text="Amount" />
+         </columns>
+      </TableView>
+      <Label layoutX="24.0" layoutY="24.0" text="Dealer money" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <Label layoutX="29.0" layoutY="39.0" text="time" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="30.0">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="time" layoutX="52.0" layoutY="31.0" text="time" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="30.0">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

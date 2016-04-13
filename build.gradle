@@ -1,0 +1,161 @@
+project.ext {
+	springVersion = '4.2.4.RELEASE'
+	serverBuild = new File(project.buildDir, '/serverBuilds')
+	clientBuild = new File(project.buildDir, '/clientBuilds')
+}
+
+buildscript {
+	repositories {
+       mavenCentral()
+    }
+    dependencies {
+        classpath('org.springframework.boot:spring-boot-gradle-plugin:1.3.3.RELEASE')
+   }
+}
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    
+    sourceCompatibility = 1.8
+    
+    group = 'org.partizanux'
+	version = '1.0'
+
+    repositories {
+       mavenCentral()
+    }
+
+	configurations.all {
+   		exclude group: "commons-logging", module: "commons-logging"
+	}
+
+    dependencies {
+    	//bridge logging from JCL to SLF4j
+ 		compile 'org.slf4j:jcl-over-slf4j:+'
+		//Logback
+		compile 'ch.qos.logback:logback-classic:+'
+		
+        testCompile 'junit:junit:4.+'
+        testCompile "org.springframework:spring-test:${springVersion}"
+        testCompile 'com.googlecode.catch-exception:catch-exception:1.2.0'
+        testCompile 'org.easymock:easymock:3.4'
+    }
+    
+}
+
+project ('mXchanger_dao') {
+	description = 'dao layer'
+	setBuildDir (serverBuild)
+	dependencies {
+		compile "org.springframework:spring-jdbc:$springVersion"
+		compile "org.springframework:spring-context:$springVersion"
+		compile 'org.postgresql:postgresql:9.4-1206-jdbc4'
+		compile 'org.hsqldb:hsqldb:2.3.3'
+		compile project (':mXchanger_domain')
+	}
+}
+
+project ('mXchanger_service') {
+	description = 'service layer'
+	setBuildDir (serverBuild)
+	dependencies {
+		compile 'com.googlecode.json-simple:json-simple:1.1.1'
+		compile project (':mXchanger_dao')
+	}
+	processTestResources.dependsOn(':mXchanger_dao:processTestResources')
+	// all tests from underlying layers
+	testClasses.dependsOn(':mXchanger_dao:testClasses')
+}
+
+project ('mXchanger_server') {
+	apply plugin: 'spring-boot'
+	description = 'server using apache mina with a main method'
+	setBuildDir (serverBuild)
+	dependencies {
+		compile 'org.apache.mina:mina-core:2.0.10'
+		compile 'org.apache.mina:mina-integration-beans:2.0.10'
+		compile project (':mXchanger_service')
+	}
+	processTestResources.dependsOn(':mXchanger_service:processTestResources')
+	// all tests from underlying layers
+	testClasses.dependsOn(':mXchanger_service:testClasses')
+	configurations { 
+		allTestClasses.extendsFrom compile
+	}
+	task allTestJar(type: Jar) { 
+		from (sourceSets.main.output)
+		from (sourceSets.test.output)
+	}
+	artifacts { 
+		allTestClasses allTestJar
+	}
+	
+	springBoot { mainClass = 'org.partizanux.mXchanger.server.MXchangerServer' }
+	
+	jar { 
+		manifest {
+        	attributes(
+                "Main-Class": 'org.partizanux.mXchanger.server.MXchangerServer',
+                "Implementation-Version": version,
+                "Build-Assembly-User": System.getProperty("user.name"),
+                "Build-Assembly-Date": new java.util.Date().toString()
+        	)
+    	}
+    	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+}
+
+project ('mXchanger_client') {
+	description = 'client with plain sockets'
+	setBuildDir (clientBuild)
+	dependencies {
+		compile 'org.apache.mina:mina-core:2.0.10'
+		compile 'org.apache.mina:mina-integration-beans:2.0.10'
+		compile "org.springframework:spring-context:$springVersion"
+		testCompile 'com.googlecode.json-simple:json-simple:1.1.1'
+		testCompile project (path: ':mXchanger_server', configuration: 'allTestClasses')
+	}
+	test { 
+		include 'org/partizanux/mXchanger/client/**'
+	}
+	// client build will not impact serverBuild dirs
+	jar << {
+		def file = new File(project.buildDir, '/tmpServerArtifacts')
+		project(':mXchanger_dao').buildDir = file
+		project(':mXchanger_service').buildDir = file
+		project(':mXchanger_server').buildDir = file
+	}
+}
+
+project ('mXchanger_client_ui') {
+	apply plugin: 'spring-boot'
+	description = 'javaFX user interface'
+	setBuildDir (clientBuild)
+	dependencies {
+		compile 'com.googlecode.json-simple:json-simple:1.1.1'
+		compile project (':mXchanger_client')
+		testCompile project (path: ':mXchanger_client', configuration: 'testRuntime')
+	}
+	sourceSets {
+    	main {
+    		resources {
+            	srcDirs += sourceSets.main.java.srcDirs
+            	excludes = ['**/*.java']
+            }
+    	}
+	}
+	processTestResources.dependsOn(':mXchanger_client:processTestResources')
+	testClasses.dependsOn(':mXchanger_client:testClasses')
+	springBoot { mainClass = 'org.partizanux.mXchanger.client_ui.ClientMain' }
+	jar { 
+		manifest {
+        	attributes(
+                "Main-Class": 'org.partizanux.mXchanger.client_ui.ClientMain',
+                "Implementation-Version": version,
+                "Build-Assembly-User": System.getProperty("user.name"),
+                "Build-Assembly-Date": new java.util.Date().toString(),
+        	)
+    	}
+    	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+}

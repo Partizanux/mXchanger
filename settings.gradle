@@ -1,0 +1,6 @@
+include 'mXchanger_dao'
+include 'mXchanger_domain'
+include 'mXchanger_service'
+include 'mXchanger_server'
+include 'mXchanger_client_ui'
+include 'mXchanger_client'

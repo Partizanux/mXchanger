@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Doesn't used ! -->
+
+    <bean id = "handler" class = "org.partizanux.mXchanger.server.Handler"/>
+    
+    <bean id = "filterChainBuilder" class = "org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+    	<property name = "filters">
+    		<map>
+    			<entry key = "loggingFilter" value-ref = "loggingFilter"/>
+    			<entry key = "codecFilter" value-ref = "codecFilter"/>
+    		</map>
+    	</property>
+    </bean>
+    
+    <bean id = "loggingFilter" class = "org.apache.mina.filter.logging.LoggingFilter"/>
+    <bean id = "codecFilter" class = "org.apache.mina.filter.codec.ProtocolCodecFilter">
+    	<constructor-arg>
+    		<bean class = "org.apache.mina.filter.codec.textline.TextLineCodecFactory">
+    			<constructor-arg>
+    				<bean class = "java.nio.charset.Charset" factory-method = "forName">
+    					<constructor-arg type = "java.lang.String" value = "UTF-8"/>
+    				</bean>
+    			</constructor-arg>
+    		</bean>
+    	</constructor-arg>
+    </bean>
+    
+    <!-- beanPostProccessor for ioAcceptor: set idle time, buffer and bind -->
+    <bean id = "initSessionConfig" class = "org.partizanux.mXchanger.server.InitSessionConfig"></bean>
+      
+    <bean id = "ioAcceptor" class = "org.apache.mina.transport.socket.nio.NioSocketAcceptor" init-method = "init" destroy-method = "unbind">
+    	<property name = "handler" ref = "handler"/>
+    	<property name = "filterChainBuilder" ref = "filterChainBuilder"/>
+    </bean>
+
+</beans>

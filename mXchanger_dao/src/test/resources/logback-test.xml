@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="OUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.springframework" level="info" additivity="false">
+		<appender-ref ref="OUT" />
+	</logger>
+
+	<logger name="org.partizanux.mXchanger" level="error" additivity="false">
+		<appender-ref ref="OUT" />
+	</logger>
+	
+	<logger name="org.apache.mina" level="debug" additivity="false">
+		<appender-ref ref="OUT" />
+	</logger>
+
+	<root level="info">
+		<appender-ref ref="OUT" />
+	</root>
+
+</configuration>
