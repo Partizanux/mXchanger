@@ -45,4 +45,4 @@ This command will build a fat executable jar file, and run tests. Also wait  2*M
 
 You should see such window:
 
-![mXchanger-img](https://cloud.githubusercontent.com/assets/6363051/14510554/c8a6640e-01da-11e6-95c9-0b260448f555.png)
+![mxchanger_client_img](https://cloud.githubusercontent.com/assets/6363051/14511672/e6a0c2fe-01e1-11e6-8334-947b4dbaea71.png)
